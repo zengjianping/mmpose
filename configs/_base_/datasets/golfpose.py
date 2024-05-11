@@ -217,8 +217,6 @@ dataset_info = dict(
         dict(link=('right_shoulder', 'right_elbow'), id=12, color=[255, 128, 0]),
         13:
         dict(link=('right_elbow', 'right_wrist'), id=13, color=[255, 128, 0]),
-        14:
-        dict(link=('left_eye', 'right_eye'), id=14, color=[51, 153, 255]),
         15:
         dict(link=('nose', 'left_eye'), id=15, color=[51, 153, 255]),
         16:
@@ -227,10 +225,6 @@ dataset_info = dict(
         dict(link=('left_eye', 'left_ear'), id=17, color=[51, 153, 255]),
         18:
         dict(link=('right_eye', 'right_ear'), id=18, color=[51, 153, 255]),
-        19:
-        dict(link=('left_ear', 'left_shoulder'), id=19, color=[51, 153, 255]),
-        20:
-        dict(link=('right_ear', 'right_shoulder'), id=20, color=[51, 153, 255]),
         21:
         dict(link=('left_ankle', 'left_big_toe'), id=21, color=[0, 255, 0]),
         22:
@@ -247,6 +241,8 @@ dataset_info = dict(
         dict(link=('left_wrist', 'left_middle_finger1'), id=27, color=[102, 178, 255]),
         28:
         dict(link=('right_wrist', 'right_middle_finger1'), id=28, color=[102, 178, 255]),
+        28:
+        dict(link=('golf_club_head', 'golf_club_tail'), id=28, color=[255, 128, 0]),
     },
     # the joint_weights is modified by MMPose Team
     joint_weights=[
@@ -276,6 +272,8 @@ dataset_info = dict(
         0.026,
         0.026,
         0.066,
+        0.079,
+        0.079,
         0.079,
         0.079,
         0.079,
