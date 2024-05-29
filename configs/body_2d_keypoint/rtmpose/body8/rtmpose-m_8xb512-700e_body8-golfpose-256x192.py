@@ -5,11 +5,11 @@ num_keypoints = 30
 input_size = (192, 256)
 
 # runtime
-max_epochs = 700
-stage2_num_epochs = 30
+max_epochs = 100
+stage2_num_epochs = 10
 base_lr = 4e-3
-train_batch_size = 128
-val_batch_size = 16
+train_batch_size = 96
+val_batch_size = 32
 
 train_cfg = dict(max_epochs=max_epochs, val_interval=10)
 randomness = dict(seed=21)
@@ -327,6 +327,24 @@ dataset_halpe = dict(
     ],
 )
 
+dataset_golfdb = dict(
+    type='GolfPoseDataset',
+    data_root=data_root,
+    data_mode=data_mode,
+    ann_file='golfdb/annotations/train.json',
+    data_prefix=dict(img='golfdb/images'),
+    pipeline=[],
+)
+
+dataset_ezgolf = dict(
+    type='GolfPoseDataset',
+    data_root=data_root,
+    data_mode=data_mode,
+    ann_file='ezgolf/task_20240418/annotations/train.json',
+    data_prefix=dict(img='ezgolf/task_20240418/images'),
+    pipeline=[],
+)
+
 dataset_posetrack = dict(
     type='PoseTrack18Dataset',
     data_root=data_root,
@@ -352,8 +370,10 @@ train_dataloader = dict(
         type='CombinedDataset',
         metainfo=dict(from_file='configs/_base_/datasets/golfpose.py'),
         datasets=[
-            dataset_coco,
-            dataset_halpe,
+            dataset_golfdb,
+            dataset_ezgolf,
+            #dataset_coco,
+            #dataset_halpe,
             #dataset_aic,
             #dataset_crowdpose,
             #dataset_mpii,
@@ -391,6 +411,24 @@ val_halpe = dict(
             num_keypoints=num_keypoints,
             mapping=halpe_golfpose)
     ],
+)
+
+val_golfdb = dict(
+    type='GolfPoseDataset',
+    data_root=data_root,
+    data_mode=data_mode,
+    ann_file='golfdb/annotations/val.json',
+    data_prefix=dict(img='golfdb/images'),
+    pipeline=[],
+)
+
+val_ezgolf = dict(
+    type='GolfPoseDataset',
+    data_root=data_root,
+    data_mode=data_mode,
+    ann_file='ezgolf/task_20240418/annotations/val.json',
+    data_prefix=dict(img='ezgolf/task_20240418/images'),
+    pipeline=[],
 )
 
 val_aic = dict(
@@ -489,8 +527,10 @@ val_dataloader = dict(
         type='CombinedDataset',
         metainfo=dict(from_file='configs/_base_/datasets/golfpose.py'),
         datasets=[
-            val_coco,
-            val_halpe,
+            val_golfdb,
+            val_ezgolf,
+            #val_coco,
+            #val_halpe,
             #val_aic,
             #val_crowdpose,
             #val_mpii,
