@@ -296,7 +296,7 @@ train_dataset = dict(
         #dataset_jhmdb,
         #dataset_posetrack,
     ],
-    sample_ratio_factor=[1, 0.4, 0.3, 0.5, 0.3, 0.3, 0.3],
+    #sample_ratio_factor=[1, 0.4, 0.3, 0.5, 0.3, 0.3, 0.3],
     test_mode=False,
     pipeline=train_pipeline_stage1
 )
@@ -544,7 +544,7 @@ model = dict(
             num_outs=2)),
     head=dict(
         type='RTMOHead',
-        num_keypoints=17,
+        num_keypoints=num_keypoints,
         featmap_strides=(16, 32),
         head_module_cfg=dict(
             num_classes=1,

@@ -356,6 +356,7 @@ dataset_posetrack = dict(
 train_dataloader = dict(
     batch_size=train_batch_size,
     num_workers=10,
+    #num_batch_per_epoch=2,
     pin_memory=False,
     persistent_workers=True,
     sampler=dict(type='DefaultSampler', shuffle=True),
@@ -505,6 +506,7 @@ val_posetrack = dict(
 val_dataloader = dict(
     batch_size=val_batch_size,
     num_workers=10,
+    #num_batch_per_epoch=2,
     pin_memory=False,
     persistent_workers=True,
     drop_last=False,
