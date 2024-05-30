@@ -4,6 +4,6 @@
 # free && sync && echo 3 > /proc/sys/vm/drop_caches && free
 
 python tools/train.py \
-    configs/body_2d_keypoint/rtmpose/body8/rtmpose-m_8xb512-700e_body8-golfpose-256x192.py \
+    configs/body_2d_keypoint/golfpose/rtmpose-m_golfpose-256x192.py \
     --amp
 
