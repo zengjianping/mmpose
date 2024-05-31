@@ -4,9 +4,9 @@ _base_ = ['../../_base_/default_runtime.py']
 num_keypoints = 30
 
 # runtime
-train_batch_size = 16
-val_batch_size = 4
-train_cfg = dict(max_epochs=600, val_interval=20, dynamic_intervals=[(580, 1)])
+train_batch_size = 4
+val_batch_size = 2
+train_cfg = dict(max_epochs=600, val_interval=1, dynamic_intervals=[(580, 1)])
 
 auto_scale_lr = dict(base_batch_size=256)
 
@@ -114,8 +114,8 @@ val_pipeline = [
         type='BottomupResize', input_size=input_size, pad_val=(114, 114, 114)),
     dict(
         type='PackPoseInputs',
-        meta_keys=('id', 'img_id', 'img_path', 'ori_shape', 'img_shape',
-                   'input_size', 'input_center', 'input_scale'))
+        meta_keys=('dataset_name', 'id', 'img_id', 'img_path', 'ori_shape', 'img_shape',
+                   'input_size', 'input_center', 'input_scale', 'raw_ann_info'))
 ]
 
 # data settings
@@ -125,16 +125,20 @@ data_root = 'data/'
 
 # mapping
 coco_golfpose = [(i, i) for i in range(17)] + [(17, 20), (18, 22), (19, 24), (20, 21), (21, 23), (22, 25)] + [(100, 26), (121, 27)]
+coco_golfpose_converter = dict(type='KeypointConverter', num_keypoints=num_keypoints, mapping=coco_golfpose)
 
 halpe_golfpose = [(i, i) for i in range(26)] + [(103, 26), (124, 27)]
+halpe_golfpose_converter = dict(type='KeypointConverter', num_keypoints=num_keypoints, mapping=halpe_golfpose)
 
 aic_golfpose = [(0, 6), (1, 8), (2, 10), (3, 5), (4, 7),
                 (5, 9), (6, 12), (7, 14), (8, 16), (9, 11), (10, 13), (11, 15),
                 (12, 17), (13, 18)]
+aic_golfpose_converter = dict(type='KeypointConverter', num_keypoints=num_keypoints, mapping=aic_golfpose)
 
 crowdpose_golfpose = [(0, 5), (1, 6), (2, 7), (3, 8), (4, 9), (5, 10), (6, 11),
                       (7, 12), (8, 13), (9, 14), (10, 15), (11, 16), (12, 17),
                       (13, 18)]
+crowdpose_golfpose_converter = dict(type='KeypointConverter', num_keypoints=num_keypoints, mapping=crowdpose_golfpose)
 
 mpii_golfpose = [
     (0, 16),
@@ -152,6 +156,7 @@ mpii_golfpose = [
     (14, 7),
     (15, 9),
 ]
+mpii_golfpose_converter = dict(type='KeypointConverter', num_keypoints=num_keypoints, mapping=mpii_golfpose)
 
 jhmdb_golfpose = [
     (0, 18),
@@ -169,8 +174,10 @@ jhmdb_golfpose = [
     (13, 16),
     (14, 15),
 ]
+jhmdb_golfpose_converter = dict(type='KeypointConverter', num_keypoints=num_keypoints, mapping=jhmdb_golfpose)
 
 ochuman_golfpose = [(i, i) for i in range(17)]
+ochuman_golfpose_converter = dict(type='KeypointConverter', num_keypoints=num_keypoints, mapping=ochuman_golfpose)
 
 posetrack_golfpose = [
     (0, 0),
@@ -190,6 +197,7 @@ posetrack_golfpose = [
     (15, 15),
     (16, 16),
 ]
+posetrack_golfpose_converter = dict(type='KeypointConverter', num_keypoints=num_keypoints, mapping=posetrack_golfpose)
 
 # train datasets
 dataset_coco = dict(
@@ -198,11 +206,8 @@ dataset_coco = dict(
     data_mode=data_mode,
     ann_file='coco/annotations/coco_wholebody_train_v1.0.json',
     data_prefix=dict(img='coco/train2017/'),
-    pipeline=[
-        dict(type='KeypointConverter',
-            num_keypoints=num_keypoints,
-            mapping=coco_golfpose)
-    ],
+    pipeline=[coco_golfpose_converter],
+    #indices=1000,  # 设置 indices=5000，表示每个 epoch 只迭代 5000 个样本
 )
 
 dataset_halpe = dict(
@@ -211,11 +216,7 @@ dataset_halpe = dict(
     data_mode=data_mode,
     ann_file='halpe/annotations/halpe_train_v1.json',
     data_prefix=dict(img='halpe/hico_20160224_det/images/train2015'),
-    pipeline=[
-        dict(type='KeypointConverter',
-            num_keypoints=num_keypoints,
-            mapping=halpe_golfpose)
-    ],
+    pipeline=[halpe_golfpose_converter],
 )
 
 dataset_aic = dict(
@@ -225,11 +226,7 @@ dataset_aic = dict(
     ann_file='aic/annotations/aic_train.json',
     data_prefix=dict(img='pose/ai_challenge/ai_challenger_keypoint'
                      '_train_20170902/keypoint_train_images_20170902/'),
-    pipeline=[
-        dict(type='KeypointConverter',
-            num_keypoints=num_keypoints,
-            mapping=aic_golfpose)
-    ],
+    pipeline=[aic_golfpose_converter],
 )
 
 dataset_crowdpose = dict(
@@ -238,11 +235,7 @@ dataset_crowdpose = dict(
     data_mode=data_mode,
     ann_file='crowdpose/annotations/mmpose_crowdpose_trainval.json',
     data_prefix=dict(img='crowdpose/images/'),
-    pipeline=[
-        dict(type='KeypointConverter',
-            num_keypoints=num_keypoints,
-            mapping=crowdpose_golfpose)
-    ],
+    pipeline=[crowdpose_golfpose_converter],
 )
 
 dataset_mpii = dict(
@@ -251,11 +244,7 @@ dataset_mpii = dict(
     data_mode=data_mode,
     ann_file='mpii/annotations/mpii_train.json',
     data_prefix=dict(img='mpii/images/'),
-    pipeline=[
-        dict(type='KeypointConverter',
-            num_keypoints=num_keypoints,
-            mapping=mpii_golfpose)
-    ],
+    pipeline=[mpii_golfpose_converter],
 )
 
 dataset_jhmdb = dict(
@@ -264,11 +253,7 @@ dataset_jhmdb = dict(
     data_mode=data_mode,
     ann_file='jhmdb/annotations/Sub1_train.json',
     data_prefix=dict(img='jhmdb/'),
-    pipeline=[
-        dict(type='KeypointConverter',
-            num_keypoints=num_keypoints,
-            mapping=jhmdb_golfpose)
-    ],
+    pipeline=[jhmdb_golfpose_converter],
 )
 
 dataset_posetrack = dict(
@@ -277,11 +262,7 @@ dataset_posetrack = dict(
     data_mode=data_mode,
     ann_file='posetrack18/annotations/posetrack18_train.json',
     data_prefix=dict(img='posetrack18/'),
-    pipeline=[
-        dict(type='KeypointConverter',
-            num_keypoints=num_keypoints,
-            mapping=posetrack_golfpose)
-    ],
+    pipeline=[posetrack_golfpose_converter],
 )
 
 train_dataset = dict(
@@ -289,7 +270,7 @@ train_dataset = dict(
     metainfo=dict(from_file=metafile),
     datasets=[
         dataset_coco,
-        dataset_halpe,
+        #dataset_halpe,
         #dataset_aic,
         #dataset_crowdpose,
         #dataset_mpii,
@@ -303,8 +284,9 @@ train_dataset = dict(
 
 train_dataloader = dict(
     batch_size=train_batch_size,
-    num_workers=8,
-    persistent_workers=True,
+    num_workers=4,
+    #num_batch_per_epoch=50,
+    persistent_workers=False,
     pin_memory=False,
     sampler=dict(type='DefaultSampler', shuffle=True),
     dataset=train_dataset)
@@ -316,11 +298,8 @@ val_coco = dict(
     data_mode=data_mode,
     ann_file='coco/annotations/coco_wholebody_val_v1.0.json',
     data_prefix=dict(img='coco/val2017/'),
-    pipeline=[
-        dict(type='KeypointConverter',
-            num_keypoints=num_keypoints,
-            mapping=coco_golfpose)
-    ],
+    pipeline=[coco_golfpose_converter],
+    #indices=1000,  # 设置 indices=5000，表示每个 epoch 只迭代 5000 个样本
 )
 
 val_halpe = dict(
@@ -329,11 +308,7 @@ val_halpe = dict(
     data_mode=data_mode,
     ann_file='halpe/annotations/halpe_val_v1.json',
     data_prefix=dict(img='coco/val2017/'),
-    pipeline=[
-        dict(type='KeypointConverter',
-            num_keypoints=num_keypoints,
-            mapping=halpe_golfpose)
-    ],
+    pipeline=[halpe_golfpose_converter],
 )
 
 val_aic = dict(
@@ -343,11 +318,7 @@ val_aic = dict(
     ann_file='aic/annotations/aic_val.json',
     data_prefix=dict(
         img='aic/ai_challenger_keypoint_validation_20170911/keypoint_validation_images_20170911/'),
-    pipeline=[
-        dict(type='KeypointConverter',
-            num_keypoints=num_keypoints,
-            mapping=aic_golfpose)
-    ],
+    pipeline=[aic_golfpose_converter],
 )
 
 val_crowdpose = dict(
@@ -356,11 +327,7 @@ val_crowdpose = dict(
     data_mode=data_mode,
     ann_file='crowdpose/annotations/mmpose_crowdpose_test.json',
     data_prefix=dict(img='crowdpose/images/'),
-    pipeline=[
-        dict(type='KeypointConverter',
-            num_keypoints=num_keypoints,
-            mapping=crowdpose_golfpose)
-    ],
+    pipeline=[crowdpose_golfpose_converter],
 )
 
 val_mpii = dict(
@@ -369,11 +336,7 @@ val_mpii = dict(
     data_mode=data_mode,
     ann_file='mpii/annotations/mpii_val.json',
     data_prefix=dict(img='mpii/images/'),
-    pipeline=[
-        dict(type='KeypointConverter',
-            num_keypoints=num_keypoints,
-            mapping=mpii_golfpose)
-    ],
+    pipeline=[mpii_golfpose_converter],
 )
 
 val_jhmdb = dict(
@@ -382,11 +345,7 @@ val_jhmdb = dict(
     data_mode=data_mode,
     ann_file='jhmdb/annotations/Sub1_test.json',
     data_prefix=dict(img='jhmdb/'),
-    pipeline=[
-        dict(type='KeypointConverter',
-            num_keypoints=num_keypoints,
-            mapping=jhmdb_golfpose)
-    ],
+    pipeline=[jhmdb_golfpose_converter],
 )
 
 val_ochuman = dict(
@@ -395,11 +354,7 @@ val_ochuman = dict(
     data_mode=data_mode,
     ann_file='ochuman/annotations/ochuman_coco_format_val_range_0.00_1.00.json',
     data_prefix=dict(img='ochuman/images/'),
-    pipeline=[
-        dict(type='KeypointConverter',
-            num_keypoints=num_keypoints,
-            mapping=ochuman_golfpose)
-    ],
+    pipeline=[ochuman_golfpose_converter],
 )
 
 val_posetrack = dict(
@@ -408,11 +363,7 @@ val_posetrack = dict(
     data_mode=data_mode,
     ann_file='posetrack18/annotations/posetrack18_val.json',
     data_prefix=dict(img='posetrack18/'),
-    pipeline=[
-        dict(type='KeypointConverter',
-            num_keypoints=num_keypoints,
-            mapping=posetrack_golfpose)
-    ],
+    pipeline=[posetrack_golfpose_converter],
 )
 
 val_dataset = dict(
@@ -420,7 +371,7 @@ val_dataset = dict(
     metainfo=dict(from_file=metafile),
     datasets=[
         val_coco,
-        val_halpe,
+        #val_halpe,
         #val_aic,
         #val_crowdpose,
         #val_mpii,
@@ -434,7 +385,8 @@ val_dataset = dict(
 val_dataloader = dict(
     batch_size=val_batch_size,
     num_workers=2,
-    persistent_workers=True,
+    #num_batch_per_epoch=50,
+    persistent_workers=False,
     pin_memory=False,
     drop_last=False,
     sampler=dict(type='DefaultSampler', shuffle=False, round_up=False),
@@ -443,11 +395,23 @@ val_dataloader = dict(
 test_dataloader = val_dataloader
 
 # evaluators
-val_evaluator = dict(
+val_evaluator1 = dict(
     type='CocoMetric',
-    ann_file=data_root + 'coco/annotations/person_keypoints_val2017.json',
+    #ann_file=data_root + 'coco/annotations/person_keypoints_val2017.json',
     score_mode='bbox',
     nms_mode='none',
+)
+val_evaluator = dict(
+    type='MultiDatasetEvaluator',
+    datasets=val_dataset['datasets'],
+    metrics=[
+        dict(type='CocoMetric', score_mode='bbox', nms_mode='none',
+             ann_file=data_root + val_coco['ann_file'],
+             gt_converter=coco_golfpose_converter, prefix='coco'),
+        #dict(type='CocoMetric', score_mode='bbox', nms_mode='none',
+        #     ann_file=data_root + val_halpe['ann_file'],
+        #     gt_converter=halpe_golfpose_converter, prefix='halpe'),
+    ],
 )
 test_evaluator = val_evaluator
 
