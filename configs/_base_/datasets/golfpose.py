@@ -241,7 +241,7 @@ dataset_info = dict(
         dict(link=('left_wrist', 'left_middle_finger1'), id=27, color=[102, 178, 255]),
         28:
         dict(link=('right_wrist', 'right_middle_finger1'), id=28, color=[102, 178, 255]),
-        28:
+        29:
         dict(link=('golf_club_head', 'golf_club_tail'), id=28, color=[255, 128, 0]),
     },
     # the joint_weights is modified by MMPose Team
