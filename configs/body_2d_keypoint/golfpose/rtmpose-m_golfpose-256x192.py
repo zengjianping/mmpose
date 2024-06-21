@@ -6,7 +6,7 @@ input_size = (192, 256)
 
 # runtime
 max_epochs = 100
-stage2_num_epochs = 10
+stage2_num_epochs = 20
 base_lr = 4e-3
 train_batch_size = 96
 val_batch_size = 32

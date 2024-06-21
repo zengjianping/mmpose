@@ -1,7 +1,10 @@
 #!/bin/bash
 
+CONFIG_FILE="configs/body_2d_keypoint/golfpose/rtmpose-m_golfpose-256x192.py"
+MODEL_FILE="work_dirs/rtmpose-m_golfpose-256x192/best_checkpoint_v2/best_AUC_epoch_100.pth"
+SHOW_DIR="evaluations/"
+
 python tools/test.py \
-    configs/body_2d_keypoint/rtmpose/body8/rtmpose-m_8xb512-700e_body8-golfpose-256x192.py \
-    work_dirs/rtmpose-m_8xb512-700e_body8-golfpose-256x192/best_AUC_epoch_100.pth \
-    --show
+    $CONFIG_FILE $MODEL_FILE \
+    --show --show-dir $SHOW_DIR
 
