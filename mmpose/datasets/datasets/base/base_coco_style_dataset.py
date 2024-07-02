@@ -77,6 +77,7 @@ class BaseCocoStyleDataset(BaseDataset):
                  test_mode: bool = False,
                  lazy_init: bool = False,
                  max_refetch: int = 1000,
+                 dataset_name: str = None,
                  sample_interval: int = 1):
 
         if data_mode not in {'topdown', 'bottomup'}:
@@ -112,6 +113,9 @@ class BaseCocoStyleDataset(BaseDataset):
             test_mode=test_mode,
             lazy_init=lazy_init,
             max_refetch=max_refetch)
+
+        if dataset_name is not None:
+            self._metainfo['dataset_name'] = dataset_name
 
         if self.test_mode:
             # save the ann_file into MessageHub for CocoMetric

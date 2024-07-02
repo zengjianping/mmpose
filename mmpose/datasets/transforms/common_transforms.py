@@ -1243,7 +1243,11 @@ class FilterAnnotations(BaseTransform):
                 'keypoints_visible', 'area')
         for key in keys:
             if key in results:
-                results[key] = results[key][keep]
+                if isinstance(results[key], list):
+                    results[key] = np.asarray(
+                        results[key])[keep].tolist()
+                else:
+                    results[key] = results[key][keep]
 
         return results
 

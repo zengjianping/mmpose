@@ -35,6 +35,8 @@ class MultiDatasetEvaluator(Evaluator):
         for dataset, metric in zip(datasets, self.metrics):
             metainfo_file = DATASETS.module_dict[dataset['type']].METAINFO
             dataset_meta = parse_pose_metainfo(metainfo_file)
+            if 'dataset_name' in dataset:
+                dataset_meta['dataset_name'] = dataset['dataset_name']
             metric.dataset_meta = dataset_meta
             metrics_dict[dataset_meta['dataset_name']] = metric
         self.metrics_dict = metrics_dict

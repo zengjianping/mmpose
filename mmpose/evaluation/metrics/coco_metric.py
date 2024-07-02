@@ -151,6 +151,7 @@ class CocoMetric(BaseMetric):
         self.outfile_prefix = outfile_prefix
         self.pred_converter = pred_converter
         self.gt_converter = gt_converter
+        self.gt_converted = False
 
     @property
     def dataset_meta(self) -> Optional[dict]:
@@ -174,6 +175,7 @@ class CocoMetric(BaseMetric):
             if ann_file is not None:
                 with get_local_path(ann_file) as local_path:
                     self.coco = COCO(local_path)
+                    self.gt_converted = False
                 print_log(
                     f'CocoMetric for dataset '
                     f"{dataset_meta['dataset_name']} has successfully "
@@ -392,11 +394,13 @@ class CocoMetric(BaseMetric):
             coco_json_path = self.gt_to_coco_json(
                 gt_dicts=gts, outfile_prefix=outfile_prefix)
             self.coco = COCO(coco_json_path)
-        if self.gt_converter is not None:
+            self.gt_converted = False
+        if self.gt_converter is not None and not self.gt_converted:
             for id_, ann in self.coco.anns.items():
                 self.coco.anns[id_] = transform_ann(
                     ann, self.gt_converter['num_keypoints'],
                     self.gt_converter['mapping'])
+            self.gt_converted = True
 
         kpts = defaultdict(list)
 
