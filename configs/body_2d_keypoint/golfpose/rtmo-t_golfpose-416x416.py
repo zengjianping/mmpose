@@ -4,8 +4,8 @@ _base_ = ['../../_base_/default_runtime.py']
 num_keypoints = 30
 
 # runtime
-train_batch_size = 8
-val_batch_size = 2
+train_batch_size = 16
+val_batch_size = 4
 train_cfg = dict(max_epochs=60, val_interval=2, dynamic_intervals=[(54, 1)])
 
 auto_scale_lr = dict(base_batch_size=256)
@@ -54,7 +54,7 @@ param_scheduler = [
 ]
 
 # data
-input_size = (640, 640)
+input_size = (416, 416)
 metafile = 'configs/_base_/datasets/golfpose.py'
 codec = dict(type='YOLOXPoseAnnotationProcessor', input_size=input_size)
 
@@ -62,12 +62,12 @@ train_pipeline_stage1 = [
     dict(type='LoadImage', backend_args=None),
     dict(
         type='Mosaic',
-        img_scale=(640, 640),
+        img_scale=(416, 416),
         pad_val=114.0,
         pre_transform=[dict(type='LoadImage', backend_args=None)]),
     dict(
         type='BottomupRandomAffine',
-        input_size=(640, 640),
+        input_size=(416, 416),
         shift_factor=0.1,
         rotate_factor=10,
         scale_factor=(0.75, 1.0),
@@ -77,12 +77,6 @@ train_pipeline_stage1 = [
         bbox_keep_corner=False,
         clip_border=True,
     ),
-    dict(
-        type='YOLOXMixUp',
-        img_scale=(640, 640),
-        ratio_range=(0.8, 1.6),
-        pad_val=114.0,
-        pre_transform=[dict(type='LoadImage', backend_args=None)]),
     dict(type='YOLOXHSVRandomAug'),
     dict(type='RandomFlip'),
     dict(type='FilterAnnotations', by_kpt=True, by_box=True, keep_empty=False),
@@ -94,7 +88,10 @@ train_pipeline_stage2 = [
     dict(type='LoadImage'),
     dict(
         type='BottomupRandomAffine',
-        input_size=(640, 640),
+        input_size=(416, 416),
+        shift_prob=0,
+        rotate_prob=0,
+        scale_prob=0,
         scale_type='long',
         pad_val=(114, 114, 114),
         bbox_keep_corner=False,
@@ -125,6 +122,9 @@ data_root = 'data/'
 backend_args = None
 
 # mapping
+golfpose_golfpose = [(i, i) for i in range(30)]
+golfpose_golfpose_converter = dict(type='KeypointConverter', num_keypoints=num_keypoints, mapping=golfpose_golfpose)
+
 coco_golfpose = [(i, i) for i in range(17)] + [(17, 20), (18, 22), (19, 24), (20, 21), (21, 23), (22, 25)] + [(100, 26), (121, 27)]
 coco_golfpose_converter = dict(type='KeypointConverter', num_keypoints=num_keypoints, mapping=coco_golfpose)
 
@@ -207,7 +207,7 @@ dataset_ezgolf = dict(
     data_mode=data_mode,
     ann_file='ezgolf/task_20240418/annotations/golfpose/train.json',
     data_prefix=dict(img='ezgolf/task_20240418/images'),
-    pipeline=[],
+    pipeline=[golfpose_golfpose_converter],
     #indices=1000,  # 设置 indices=5000，表示每个 epoch 只迭代 5000 个样本
 )
 
@@ -217,7 +217,7 @@ dataset_golfdb = dict(
     data_mode=data_mode,
     ann_file='golfdb/annotations/golfpose/train.json',
     data_prefix=dict(img='golfdb/images'),
-    pipeline=[],
+    pipeline=[golfpose_golfpose_converter],
     #indices=1000,  # 设置 indices=5000，表示每个 epoch 只迭代 5000 个样本
 )
 
@@ -321,7 +321,7 @@ val_ezgolf = dict(
     ann_file='ezgolf/task_20240418/annotations/golfpose/val.json',
     data_prefix=dict(img='ezgolf/task_20240418/images'),
     dataset_name='ezgolf',
-    pipeline=[],
+    pipeline=[golfpose_golfpose_converter],
     #indices=50,  # 设置 indices=5000，表示每个 epoch 只迭代 5000 个样本
 )
 
@@ -332,7 +332,7 @@ val_golfdb = dict(
     ann_file='golfdb/annotations/golfpose/val.json',
     data_prefix=dict(img='golfdb/images'),
     dataset_name='golfdb',
-    pipeline=[],
+    pipeline=[golfpose_golfpose_converter],
     #indices=50,  # 设置 indices=5000，表示每个 epoch 只迭代 5000 个样本
 )
 
@@ -494,8 +494,6 @@ custom_hooks = [
         epoch_attributes={
             280: {
                 'proxy_target_cc': True,
-                'overlaps_power': 1.0,
-                'loss_cls.loss_weight': 2.0,
                 'loss_mle.loss_weight': 5.0,
                 'loss_oks.loss_weight': 10.0
             },
@@ -512,8 +510,8 @@ custom_hooks = [
 ]
 
 # model
-widen_factor = 0.75
-deepen_factor = 0.67
+widen_factor = 0.375
+deepen_factor = 0.33
 
 model = dict(
     type='BottomupPoseEstimator',
@@ -532,7 +530,7 @@ model = dict(
         batch_augments=[
             dict(
                 type='BatchSyncRandomResize',
-                random_size_range=(480, 800),
+                random_size_range=(320, 640),
                 size_divisor=32,
                 interval=1),
         ]),
@@ -546,13 +544,14 @@ model = dict(
         act_cfg=dict(type='Swish'),
         init_cfg=dict(
             type='Pretrained',
-            checkpoint='https://download.openmmlab.com/mmpose/v1/'
-            'pretrained_models/yolox_m_8x8_300e_coco_20230829.pth',
+            checkpoint='https://download.openmmlab.com/mmdetection/v2.0/'
+            'yolox/yolox_tiny_8x8_300e_coco/yolox_tiny_8x8_300e_coco_'
+            '20211124_171234-b4047906.pth',
             prefix='backbone.',
         )),
     neck=dict(
         type='HybridEncoder',
-        in_channels=[192, 384, 768],
+        in_channels=[96, 192, 384],
         deepen_factor=deepen_factor,
         widen_factor=widen_factor,
         hidden_dim=256,
@@ -568,7 +567,7 @@ model = dict(
             type='ChannelMapper',
             in_channels=[256, 256],
             kernel_size=1,
-            out_channels=384,
+            out_channels=192,
             act_cfg=None,
             norm_cfg=dict(type='BN'),
             num_outs=2)),
@@ -581,7 +580,7 @@ model = dict(
             in_channels=256,
             cls_feat_channels=256,
             channels_per_group=36,
-            pose_vec_channels=384,
+            pose_vec_channels=192,
             widen_factor=widen_factor,
             stacked_convs=2,
             norm_cfg=dict(type='BN', momentum=0.03, eps=0.001),
@@ -589,13 +588,14 @@ model = dict(
         assigner=dict(
             type='SimOTAAssigner',
             dynamic_k_indicator='oks',
-            oks_calculator=dict(type='PoseOKS', metainfo=metafile)),
+            oks_calculator=dict(type='PoseOKS', metainfo=metafile),
+            use_keypoints_for_center=True),
         prior_generator=dict(
             type='MlvlPointGenerator',
             centralize_points=True,
             strides=[16, 32]),
         dcc_cfg=dict(
-            in_channels=384,
+            in_channels=192,
             feat_channels=128,
             num_bins=(192, 256),
             spe_channels=128,
@@ -631,7 +631,7 @@ model = dict(
         loss_mle=dict(
             type='MLECCLoss',
             use_target_weight=True,
-            loss_weight=1e-2,
+            loss_weight=1.0,
         ),
         loss_bbox_aux=dict(type='L1Loss', reduction='sum', loss_weight=1.0),
     ),
