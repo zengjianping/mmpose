@@ -8,7 +8,7 @@ train_batch_size = 16
 val_batch_size = 4
 
 # runtime
-train_cfg = dict(max_epochs=80, val_interval=2, dynamic_intervals=[(70, 2)])
+train_cfg = dict(max_epochs=100, val_interval=2, dynamic_intervals=[(80, 2)])
 
 auto_scale_lr = dict(base_batch_size=256)
 
@@ -18,7 +18,7 @@ default_hooks = dict(
 optim_wrapper = dict(
     type='OptimWrapper',
     constructor='ForceDefaultOptimWrapperConstructor',
-    optimizer=dict(type='AdamW', lr=0.002, weight_decay=0.05),
+    optimizer=dict(type='AdamW', lr=0.004, weight_decay=0.05),
     paramwise_cfg=dict(
         norm_decay_mult=0,
         bias_decay_mult=0,
@@ -37,26 +37,26 @@ param_scheduler = [
     dict(
         type='CosineAnnealingLR',
         eta_min=0.0002,
-        begin=10,
-        T_max=30,
-        end=30,
+        begin=5,
+        T_max=40,
+        end=40,
         by_epoch=True,
         convert_to_iter_based=True),
     # this scheduler is used to increase the lr from 2e-4 to 5e-4
-    dict(type='ConstantLR', by_epoch=True, factor=2.5, begin=30, end=31),
+    dict(type='ConstantLR', by_epoch=True, factor=2.5, begin=40, end=41),
     dict(
         type='CosineAnnealingLR',
         eta_min=0.0002,
-        begin=31,
-        T_max=40,
-        end=70,
+        begin=41,
+        T_max=50,
+        end=80,
         by_epoch=True,
         convert_to_iter_based=True),
-    dict(type='ConstantLR', by_epoch=True, factor=1, begin=70, end=80),
+    dict(type='ConstantLR', by_epoch=True, factor=1, begin=80, end=100),
 ]
 
 # data
-input_size = (416, 416)
+input_size = (640, 640)
 metafile = 'configs/_base_/datasets/golfclub.py'
 codec = dict(type='YOLOXPoseAnnotationProcessor', input_size=input_size)
 
@@ -64,12 +64,12 @@ train_pipeline_stage1 = [
     dict(type='LoadImage', backend_args=None),
     dict(
         type='Mosaic',
-        img_scale=(416, 416),
+        img_scale=(640, 640),
         pad_val=114.0,
         pre_transform=[dict(type='LoadImage', backend_args=None)]),
     dict(
         type='BottomupRandomAffine',
-        input_size=(416, 416),
+        input_size=(640, 640),
         shift_factor=0.1,
         rotate_factor=10,
         scale_factor=(0.75, 1.0),
@@ -79,6 +79,12 @@ train_pipeline_stage1 = [
         bbox_keep_corner=False,
         clip_border=True,
     ),
+    dict(
+        type='YOLOXMixUp',
+        img_scale=(640, 640),
+        ratio_range=(0.8, 1.6),
+        pad_val=114.0,
+        pre_transform=[dict(type='LoadImage', backend_args=None)]),
     dict(type='YOLOXHSVRandomAug'),
     dict(type='RandomFlip'),
     dict(type='FilterAnnotations', by_kpt=True, by_box=True, keep_empty=False),
@@ -90,7 +96,7 @@ train_pipeline_stage2 = [
     dict(type='LoadImage'),
     dict(
         type='BottomupRandomAffine',
-        input_size=(416, 416),
+        input_size=(640, 640),
         shift_prob=0,
         rotate_prob=0,
         scale_prob=0,
@@ -270,14 +276,14 @@ test_evaluator = val_evaluator
 custom_hooks = [
     dict(
         type='YOLOXPoseModeSwitchHook',
-        num_last_epochs=10,
+        num_last_epochs=20,
         new_train_dataset=train_dataset,
         new_train_pipeline=train_pipeline_stage2,
         priority=48),
     dict(
         type='RTMOModeSwitchHook',
         epoch_attributes={
-            280: {
+            80: {
                 'proxy_target_cc': True,
                 'loss_mle.loss_weight': 5.0,
                 'loss_oks.loss_weight': 10.0
@@ -295,7 +301,7 @@ custom_hooks = [
 ]
 
 # model
-widen_factor = 0.375
+widen_factor = 0.5
 deepen_factor = 0.33
 
 model = dict(
@@ -315,7 +321,7 @@ model = dict(
         batch_augments=[
             dict(
                 type='BatchSyncRandomResize',
-                random_size_range=(320, 640),
+                random_size_range=(480, 800),
                 size_divisor=32,
                 interval=1),
         ]),
@@ -330,13 +336,13 @@ model = dict(
         init_cfg=dict(
             type='Pretrained',
             checkpoint='https://download.openmmlab.com/mmdetection/v2.0/'
-            'yolox/yolox_tiny_8x8_300e_coco/yolox_tiny_8x8_300e_coco_'
-            '20211124_171234-b4047906.pth',
+            'yolox/yolox_s_8x8_300e_coco/yolox_s_8x8_300e_coco_'
+            '20211121_095711-4592a793.pth',
             prefix='backbone.',
         )),
     neck=dict(
         type='HybridEncoder',
-        in_channels=[96, 192, 384],
+        in_channels=[128, 256, 512],
         deepen_factor=deepen_factor,
         widen_factor=widen_factor,
         hidden_dim=256,
@@ -352,7 +358,7 @@ model = dict(
             type='ChannelMapper',
             in_channels=[256, 256],
             kernel_size=1,
-            out_channels=192,
+            out_channels=256,
             act_cfg=None,
             norm_cfg=dict(type='BN'),
             num_outs=2)),
@@ -365,7 +371,7 @@ model = dict(
             in_channels=256,
             cls_feat_channels=256,
             channels_per_group=36,
-            pose_vec_channels=192,
+            pose_vec_channels=256,
             widen_factor=widen_factor,
             stacked_convs=2,
             norm_cfg=dict(type='BN', momentum=0.03, eps=0.001),
@@ -381,7 +387,7 @@ model = dict(
             centralize_points=True,
             strides=[16, 32]),
         dcc_cfg=dict(
-            in_channels=192,
+            in_channels=256,
             feat_channels=128,
             num_bins=(192, 256),
             spe_channels=128,

@@ -13,5 +13,11 @@ CHECKPOINT_FILE=https://download.openmmlab.com/mmpose/v1/projects/rtmpose/rtmdet
 CONFIG_FILE=configs/body_2d_keypoint/rtmo/body7/rtmo-t_8xb32-600e_body7-416x416.py
 CHECKPOINT_FILE=https://download.openmmlab.com/mmpose/v1/projects/rtmo/rtmo-t_8xb32-600e_body7-416x416-f48f75cb_20231219.pth
 
+CONFIG_FILE=configs/body_2d_keypoint/golfpose/rtmo-t_golfclub-416x416.py
+CHECKPOINT_FILE="work_dirs/rtmo-t_golfclub-416x416/epoch_80.pth"
+
+CONFIG_FILE=configs/body_2d_keypoint/golfpose/rtmo-s_golfclub-640x640.py
+CHECKPOINT_FILE="work_dirs/rtmo-s_golfclub-640x640/epoch_54.pth"
+
 python tools/test.py \
     $CONFIG_FILE $CHECKPOINT_FILE

@@ -177,7 +177,7 @@ train_pipeline_stage2 = [
 # mapping
 coco_halpe28 = [(i, i) for i in range(17)] + [(17, 20), (18, 22), (19, 24), (20, 21), (21, 23), (22, 25)] + [(100, 26), (121, 27)]
 
-golfpose_halpe28 = [(i, i) for i in range(28)]
+halpe28_halpe28 = [(i, i) for i in range(28)]
 
 halpe_halpe28 = [(i, i) for i in range(26)] + [(103, 26), (124, 27)]
 
@@ -246,7 +246,7 @@ posetrack_halpe28 = [
 
 # train datasets
 dataset_golfdb = dict(
-    type='GolfPoseDataset',
+    type='Halpe28Dataset',
     data_root=data_root,
     data_mode=data_mode,
     ann_file='golfdb/annotations/halpe28/train.json',
@@ -254,12 +254,12 @@ dataset_golfdb = dict(
     pipeline=[
         dict(type='KeypointConverter',
             num_keypoints=num_keypoints,
-            mapping=golfpose_halpe28)
+            mapping=halpe28_halpe28)
     ],
 )
 
 dataset_ezgolf = dict(
-    type='GolfPoseDataset',
+    type='Halpe28Dataset',
     data_root=data_root,
     data_mode=data_mode,
     ann_file='ezgolf/task_20240418/annotations/halpe28/train.json',
@@ -267,7 +267,20 @@ dataset_ezgolf = dict(
     pipeline=[
         dict(type='KeypointConverter',
             num_keypoints=num_keypoints,
-            mapping=golfpose_halpe28)
+            mapping=halpe28_halpe28)
+    ],
+)
+
+dataset_ezgolf_t2 = dict(
+    type='Halpe28Dataset',
+    data_root=data_root,
+    data_mode=data_mode,
+    ann_file='ezgolf/task_20240628/annotations/halpe28/train.json',
+    data_prefix=dict(img='ezgolf/task_20240628/images'),
+    pipeline=[
+        dict(type='KeypointConverter',
+            num_keypoints=num_keypoints,
+            mapping=halpe28_halpe28)
     ],
 )
 
@@ -380,12 +393,13 @@ train_dataloader = dict(
         datasets=[
             dataset_golfdb,
             dataset_ezgolf,
+            dataset_ezgolf_t2,
             dataset_coco,
             dataset_halpe,
-            #dataset_aic,
+            dataset_aic,
             #dataset_crowdpose,
             dataset_mpii,
-            #dataset_jhmdb,
+            dataset_jhmdb,
             #dataset_posetrack,
         ],
         pipeline=train_pipeline,
@@ -395,7 +409,7 @@ train_dataloader = dict(
 
 # val datasets
 val_golfdb = dict(
-    type='GolfPoseDataset',
+    type='Halpe28Dataset',
     data_root=data_root,
     data_mode=data_mode,
     ann_file='golfdb/annotations/halpe28/val.json',
@@ -403,12 +417,12 @@ val_golfdb = dict(
     pipeline=[
         dict(type='KeypointConverter',
             num_keypoints=num_keypoints,
-            mapping=golfpose_halpe28)
+            mapping=halpe28_halpe28)
     ],
 )
 
 val_ezgolf = dict(
-    type='GolfPoseDataset',
+    type='Halpe28Dataset',
     data_root=data_root,
     data_mode=data_mode,
     ann_file='ezgolf/task_20240418/annotations/halpe28/val.json',
@@ -416,7 +430,20 @@ val_ezgolf = dict(
     pipeline=[
         dict(type='KeypointConverter',
             num_keypoints=num_keypoints,
-            mapping=golfpose_halpe28)
+            mapping=halpe28_halpe28)
+    ],
+)
+
+val_ezgolf_t2 = dict(
+    type='Halpe28Dataset',
+    data_root=data_root,
+    data_mode=data_mode,
+    ann_file='ezgolf/task_20240628/annotations/halpe28/val.json',
+    data_prefix=dict(img='ezgolf/task_20240628/images'),
+    pipeline=[
+        dict(type='KeypointConverter',
+            num_keypoints=num_keypoints,
+            mapping=halpe28_halpe28)
     ],
 )
 
@@ -539,12 +566,13 @@ val_dataloader = dict(
         datasets=[
             val_golfdb,
             val_ezgolf,
+            val_ezgolf_t2,
             val_coco,
             val_halpe,
-            #val_aic,
+            val_aic,
             #val_crowdpose,
             val_mpii,
-            #val_jhmdb,
+            val_jhmdb,
             #val_ochuman,
             #val_posetrack,
         ],

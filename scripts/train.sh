@@ -7,9 +7,10 @@
 #CONFIG_FILE="configs/body_2d_keypoint/golfpose/rtmpose-m_golfpose-256x192.py"
 #CONFIG_FILE="configs/body_2d_keypoint/golfpose/rtmpose-m_halpe28-256x192.py"
 #CONFIG_FILE="configs/body_2d_keypoint/golfpose/rtmo-m_golfpose-640x640.py"
-CONFIG_FILE="configs/body_2d_keypoint/golfpose/rtmo-t_golfpose-416x416.py"
+#CONFIG_FILE="configs/body_2d_keypoint/golfpose/rtmo-t_golfpose-416x416.py"
 #CONFIG_FILE="configs/body_2d_keypoint/golfpose/rtmo-m_golfclub-640x640.py"
 #CONFIG_FILE="configs/body_2d_keypoint/golfpose/rtmo-t_golfclub-416x416.py"
+CONFIG_FILE="configs/body_2d_keypoint/golfpose/rtmo-s_golfclub-640x640.py"
 #CONFIG_FILE="configs/body_2d_keypoint/golfpose/rtmo-t_halpe28-416x416.py"
 
 #export CUDA_LAUNCH_BLOCKING=1

@@ -806,7 +806,9 @@ class RTMOHead(YOLOXPoseHead):
             sum(num_fg_imgs),
             dtype=torch.float,
             device=flatten_cls_scores.device)
-        num_total_samples = max(reduce_mean(num_pos), 1.0)
+        num_pos_1 = torch.tensor(1, dtype=torch.float,
+            device=flatten_cls_scores.device)
+        num_total_samples = max(reduce_mean(num_pos), num_pos_1)
 
         # 3. calculate loss
         extra_info = dict(num_samples=num_total_samples)
